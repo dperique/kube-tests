@@ -42,6 +42,30 @@ $ iperf -sui 1
 $ iperf -c -u -i 1 10.233.67.80
 ```
 
+## Check iptables (Calico only)
+
+Calico and kube-proxy set up networking in the form of iptables.  You should be able
+to flush the iptables and they should refresh (the Pod residing on the node where you
+did an iptables flush will do this; you can observe this by looking at the live logs
+on the calico and kube-proxy pods).
+
+kube-proxy takes care of Kubernetes services and service load balancers implemented
+as iptables rules.  Calico takes care of networking paths
+
+For each node, list the iptables:
+
+```
+$ iptables -L -n -v
+$ iptables -L -n -v -t nat
+```
+
+For each node, flush the iptables (DO NOT DO ON PRODUCTION!):
+
+```
+$ iptables -F
+$ iptables -F -t nat
+```
+
 ## Test to confirm /etc/hosts
 
 After adding a new Kubernetes node using kubespray, the /etc/hosts file should list every node.
