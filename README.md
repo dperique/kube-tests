@@ -42,6 +42,22 @@ $ iperf -sui 1
 $ iperf -c -u -i 1 10.233.67.80
 ```
 
+## Test to confirm /etc/hosts
+
+After adding a new Kubernetes node using kubespray, the /etc/hosts file should list every node.
+This is especially true with the apiserver, controller, and scheduler.  There have been times
+when I add a Kubernetes node only to find out that kubelet doesn't start.
+
+After adding a new Kubernetes node, run these commands (I assume 3 Kubernetes masters named
+"kube-test-k8s-node-{1..3}").  View
+the results and you should see all of your Kubernetes nodes listed in /etc/hosts.
+
+```
+for i in 1 2 3 ; do kubectl -n kube-system exec -t kube-apiserver-kube-test-k8s-node-$i cat /etc/hosts ; done
+for i in 1 2 3 ; do kubectl -n kube-system exec -t kube-controller-manager-kube-test-k8s-node-$i cat /etc/hosts ; done
+for i in 1 2 3 ; do kubectl -n kube-system exec -t kube-scheduler-kube-test-k8s-node-$i cat /etc/hosts ; done
+```
+
 ## Test Calico upgrade
 
 Calico upgrades from v2.x to v2.x+1 are quick and deployed in a rolling fashion becase
@@ -51,11 +67,13 @@ workloads.
 
 The test:
 
-* Setup a full-mesh ping or full-mesh iperf test
+* Setup and run a full-mesh ping or full-mesh iperf test
 * Upgrade the calico daemonset
   * the calico pods should restart in a rolling fashion
   * You should see no loss in traffic
 * Repeat with more traffic as needed
+* Restart several Pods (this will make calico give more IP addresses)
+* Setup and run a full-mesh ping or full-mesh iperf test
 
 Calico upgrades from 2.x to 3.x require a database migration.  We use kubespray to run
 this upgrade.  Repeat the same test above except upgrade from Calico 2.x to 3.x.
