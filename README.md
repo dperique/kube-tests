@@ -65,7 +65,7 @@ for i in $(kubectl get po -o wide | grep $aPodName | awk '{print $6}'); do
 done
 ```
 
-## Check iptables (Calico only)
+## The iptables test (Calico only)
 
 Calico and kube-proxy set up networking in the form of iptables.  You should be able
 to flush the iptables and they should refresh (the Pod residing on the node where you
@@ -109,6 +109,28 @@ for i in 1 2 3 ; do kubectl -n kube-system exec -t kube-scheduler-kube-test-k8s-
 
 See [this article](https://www.bluematador.com/blog/kubernetes-events-explained) for ideas which
 I'll expand upon later.
+
+## Test Kubernetes control plane is robust
+
+We want to ensure that the apiserver, scheduler, and controller pods on each Kubernetes master
+and in good shape and can restart at any time.  Kubelet brings them up as static pods so this
+should be no problem.  The pods reside in the kube-system namespace and involves destroying
+the pods and seeing that they get restarted.  You can observe this behavior when running
+kubespray.
+
+Login to each Kubernetes node and do this:
+
+```
+$ docker ps -af name=k8s_kube-apiserver* -q | xargs --no-run-if-empty docker rm -f
+$ docker ps -af name=k8s_kube-controller-manager* -q | xargs --no-run-if-empty docker rm -f
+$ docker ps -af name=k8s_kube-scheduler* -q | xargs --no-run-if-empty docker rm -f
+
+In each case the right Kubernetes control plane pod should come back up.  You can use this
+command to check:
+
+```
+$ kubectl get pod -n kube-system
+```
 
 ## Test Calico upgrade
 
