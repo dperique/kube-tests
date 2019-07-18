@@ -124,6 +124,7 @@ Login to each Kubernetes node and do this:
 $ docker ps -af name=k8s_kube-apiserver* -q | xargs --no-run-if-empty docker rm -f
 $ docker ps -af name=k8s_kube-controller-manager* -q | xargs --no-run-if-empty docker rm -f
 $ docker ps -af name=k8s_kube-scheduler* -q | xargs --no-run-if-empty docker rm -f
+```
 
 In each case the right Kubernetes control plane pod should come back up.  You can use this
 command to check:
